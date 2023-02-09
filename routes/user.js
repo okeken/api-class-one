@@ -1,20 +1,19 @@
 const express = require("express");
-const user = require("../user.json");
+const {
+  createUser,
+  getAllUser,
+  getUserById,
+  updateUser,
+  deleteUser,
+} = require("../controller/user");
 
 const userRouter = express.Router();
 
-userRouter.get("/", async function (req, res) {
-  return res.status(200).json({
-    data: user,
-  });
-});
-
-userRouter.post("/", async function (req, res) {
-  const userName = req.body;
-  console.log(userName);
-  return res.status(201).json({
-    data: `success! ${userName.name} created successfully`,
-  });
-});
+userRouter
+  .get("/", getAllUser)
+  .get("/:id", getUserById)
+  .post("/", createUser)
+  .put("/:id", updateUser)
+  .delete("/:id", deleteUser);
 
 module.exports = userRouter;

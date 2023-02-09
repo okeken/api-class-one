@@ -3,6 +3,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const countries = require("./countries");
+const indexRouter = require("./routes");
 const userRoute = require("./routes/user");
 
 const PORT = 5000;
@@ -10,16 +11,15 @@ const app = express();
 
 // app.use("/", userRoute)
 
+// M -Model, V - View C- Controller
+
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-app.get("/", function (req, res) {
-  return res.status(200).json({
-    data: "Welcome to our api ",
-    status: 200,
-  });
-});
 app.use("/user", userRoute);
+app.use("/", indexRouter);
+
+// loval/user/edit
 
 app.listen(PORT, () => {
   console.log(`App runnin on port ${PORT}`);
