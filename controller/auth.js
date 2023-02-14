@@ -1,16 +1,47 @@
 const user = require("../user.json");
 const fs = require("fs/promises");
 const { UserDb } = require("../models/user");
+const bcrypt = require("bcryptjs");
 
+const saltRound = process.env.SALT_ROUND;
+
+// joi
+// express- validator
+// yup
 const createUser = async (req, res) => {
-  const name = req.body.name;
-  try {
-    const created = new UserDb({
-      name,
+  const { username, email, password } = req.body;
+  const hashed = await bcrypt.hash(password, 10);
+
+  if (!username || !email || !password) {
+    return res.status(400).json({
+      message: "All fields are required",
     });
-    const saved = await created.save();
+  }
+
+  try {
+    // find user wit email
+    const user = await UserDb.findOne({ email });
+
+    if (user) {
+      return res.status(400).json({
+        message: "email not available",
+      });
+    }
+    const userName = await UserDb.findOne({ username });
+
+    if (userName) {
+      return res.status(400).json({
+        message: "username already taken",
+      });
+    }
+    const created = new UserDb({
+      username,
+      email,
+      hashedPassword: hashed,
+    });
+    await created.save();
     return res.status(201).json({
-      data: saved,
+      data: "user created",
     });
   } catch (e) {
     res.status(500).json({
@@ -22,14 +53,9 @@ const createUser = async (req, res) => {
 const getAllUser = async (req, res) => {
   try {
     const users = await UserDb.find({});
-    // deep clone
-    const cloned = JSON.parse(JSON.stringify(users));
-    const mapped = cloned.map((i) => ({
-      ...i,
-      hashedPassword: "",
-    }));
+    console.log(users, "users");
     return res.status(200).json({
-      data: mapped,
+      data: users,
     });
   } catch (e) {
     res.status(500).json({
