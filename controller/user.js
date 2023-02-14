@@ -1,13 +1,22 @@
 const user = require("../user.json");
 const fs = require("fs/promises");
+const { UserDb } = require("../models/user");
 
 const createUser = async (req, res) => {
+  const name = req.body.name;
   try {
-    const newUsers = [...user, req.body];
-    await fs.writeFile("user.json", JSON.stringify(newUsers, null, 2));
-    return res.status(201).json({
-      data: `success! created successfully`,
+    const created = new UserDb({
+      name,
     });
+    const saved = await created.save();
+    return res.status(201).json({
+      data: saved,
+    });
+    // const newUsers = [...user, req.body];
+    // await fs.writeFile("user.json", JSON.stringify(newUsers, null, 2));
+    // return res.status(201).json({
+    //   data: `success! created successfully`,
+    // });
   } catch (e) {
     res.status(500).json({
       error: e,

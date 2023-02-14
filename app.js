@@ -1,40 +1,34 @@
 // const http = require("http");
-
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const countries = require("./countries");
 const indexRouter = require("./routes");
 const userRoute = require("./routes/user");
+const { connectDatabase } = require("./config/db");
 
 const PORT = 5000;
 const app = express();
 
-// app.use("/", userRoute)
+async function main() {
+  await connectDatabase();
+}
 
-// M -Model, V - View C- Controller
+main()
+  .then(() => {
+    app.use(bodyParser.json()); // for parsing application/json
+    app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+    app.get("/test", (req, res) => {
+      // console.log(process.env.DB_URL, "db details");
+      return res.status(200).json({
+        data: "world",
+      });
+    });
+    app.use("/user", userRoute);
+    app.use("/", indexRouter);
 
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-
-app.use("/user", userRoute);
-app.use("/", indexRouter);
-
-// loval/user/edit
-
-app.listen(PORT, () => {
-  console.log(`App runnin on port ${PORT}`);
-});
-
-// M - Model
-// V - View
-// C - Controller
-
-// http
-//   .createServer(function (req, res) {
-//     res.writeHead(200, { "Content-Type": "text/json" });
-//     res.write(JSON.stringify(countries));
-//     res.end();
-//   })
-//   .listen(5000, () => {
-//     console.log("App Listein on port 5000");
-//   });
+    app.listen(PORT, () => {
+      console.log(`App runnin on port ${PORT}`);
+    });
+  })
+  .catch((e) => console.log(e));
