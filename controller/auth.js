@@ -1,7 +1,8 @@
-const user = require("../user.json");
-const fs = require("fs/promises");
 const { UserDb } = require("../models/user");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+// const random = require("crypto").randomBytes(256).toString("base64");
+// console.log(random);
 
 const saltRound = process.env.SALT_ROUND;
 
@@ -50,97 +51,47 @@ const createUser = async (req, res) => {
   }
 };
 
-const getAllUser = async (req, res) => {
+const login = async (req, res) => {
+  const { email, password } = req.body;
+  const secret = process.env.SECRET;
+
   try {
-    const users = await UserDb.find({});
-    console.log(users, "users");
+    // check if user exists
+    const user = await UserDb.findOne({ email });
+    if (!user?.email) {
+      return res.status(404).json({
+        message: "user not found",
+      });
+    }
+    // check if password is correct
+    const isPasswordValid = await bcrypt.compare(password, user.hashedPassword);
+    if (!isPasswordValid) {
+      return res.status(403).json({
+        message: "Invalid password",
+      });
+    }
+
+    const deepClonedUser = JSON.parse(JSON.stringify(user));
+    const accessToken = jwt.sign(
+      {
+        data: deepClonedUser,
+      },
+      secret,
+      { expiresIn: "24h" }
+    );
+
     return res.status(200).json({
-      data: users,
+      accessToken,
     });
   } catch (e) {
-    res.status(500).json({
+    return res.status(500).json({
       error: e,
-    });
-  }
-};
-
-const getUserById = async (req, res) => {
-  try {
-    const id = req.params.id;
-
-    const currentUser = user.find((i) => i.id == id);
-
-    if (currentUser?.id)
-      return res.status(200).json({
-        data: currentUser,
-      });
-
-    return res.status(404).json({
-      data: {},
-      message: `can find user with id ${id}`,
-    });
-  } catch (e) {
-    res.status(500).json({
-      error: e,
-    });
-  }
-};
-
-const updateUser = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const data = req.body;
-    const currentUser = user.find((i) => i.id === +id);
-    if (!currentUser?.id) {
-      return res.status(404).json({
-        message: `user with ${id} not found`,
-      });
-    }
-    const updatedUser = {
-      ...currentUser,
-      ...data,
-    };
-
-    const updatedData = user.filter((i) => i.id !== +id);
-    const fullData = [...updatedData, updatedUser];
-
-    await fs.writeFile("user.json", JSON.stringify(fullData, null, 2));
-    return res.status(201).json({
-      data: updatedUser,
-      message: `user with ${id} updated!`,
-    });
-  } catch (e) {
-    res.status(500).json({
-      error: e,
-    });
-  }
-};
-
-const deleteUser = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const currentUser = user.find((i) => i.id === +id);
-
-    if (!currentUser?.id) {
-      return res.status(404).json({
-        message: `user with ${id} not found`,
-      });
-    }
-    const updatedData = user.filter((i) => i.id !== +id);
-
-    await fs.writeFile("user.json", JSON.stringify(updatedData, null, 2));
-    return res.status(204);
-  } catch (e) {
-    res.status(500).json({
-      error: e,
+      message: "Server Error",
     });
   }
 };
 
 module.exports = {
   createUser,
-  getAllUser,
-  getUserById,
-  updateUser,
-  deleteUser,
+  login,
 };

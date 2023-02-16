@@ -5,13 +5,15 @@ const bodyParser = require("body-parser");
 const countries = require("./countries");
 const indexRouter = require("./routes");
 const userRoute = require("./routes/user");
+const authRoute = require("./routes/auth");
 const { connectDatabase } = require("./config/db");
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 const app = express();
 
 async function main() {
   await connectDatabase();
+  console.log("DB Connected successfully!");
 }
 
 main()
@@ -25,6 +27,7 @@ main()
       });
     });
     app.use("/user", userRoute);
+    app.use("/auth", authRoute);
     app.use("/", indexRouter);
 
     app.listen(PORT, () => {
