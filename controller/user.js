@@ -2,23 +2,6 @@ const user = require("../user.json");
 const fs = require("fs/promises");
 const { UserDb } = require("../models/user");
 
-const createUser = async (req, res) => {
-  const name = req.body.name;
-  try {
-    const created = new UserDb({
-      name,
-    });
-    const saved = await created.save();
-    return res.status(201).json({
-      data: saved,
-    });
-  } catch (e) {
-    res.status(500).json({
-      error: e,
-    });
-  }
-};
-
 const getAllUser = async (req, res) => {
   try {
     const users = await UserDb.find({});
@@ -39,21 +22,16 @@ const getAllUser = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
+  const id = req.params.id;
   try {
-    const id = req.params.id;
-
-    const currentUser = user.find((i) => i.id == id);
-
-    if (currentUser?.id)
-      return res.status(200).json({
-        data: currentUser,
-      });
+    const currentUser = await UserDb.findOne({ _id: id });
 
     return res.status(404).json({
-      data: {},
+      data: currentUser,
       message: `can find user with id ${id}`,
     });
   } catch (e) {
+    console.log(e, "Error");
     res.status(500).json({
       error: e,
     });
@@ -64,26 +42,23 @@ const updateUser = async (req, res) => {
   try {
     const id = req.params.id;
     const data = req.body;
-    const currentUser = user.find((i) => i.id === +id);
-    if (!currentUser?.id) {
+    const findUser = await UserDb.findById(id);
+    console.log(findUser, "user ");
+    if (!findUser?._id) {
       return res.status(404).json({
-        message: `user with ${id} not found`,
+        status: false,
+        message: "cant find user",
       });
     }
-    const updatedUser = {
-      ...currentUser,
-      ...data,
-    };
+    console.log(data);
+    const updatedUser = await UserDb.updateOne({ $set: data });
 
-    const updatedData = user.filter((i) => i.id !== +id);
-    const fullData = [...updatedData, updatedUser];
-
-    await fs.writeFile("user.json", JSON.stringify(fullData, null, 2));
     return res.status(201).json({
       data: updatedUser,
       message: `user with ${id} updated!`,
     });
   } catch (e) {
+    console.log(e, "Error");
     res.status(500).json({
       error: e,
     });
@@ -112,7 +87,6 @@ const deleteUser = async (req, res) => {
 };
 
 module.exports = {
-  createUser,
   getAllUser,
   getUserById,
   updateUser,

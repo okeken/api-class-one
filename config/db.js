@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 // SELECT * FROM  db.user
 // import db from "db"
 //  const users = db.find({
-  ///
+///
 //})
 //
 //

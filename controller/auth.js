@@ -1,15 +1,9 @@
 const { UserDb } = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-// const random = require("crypto").randomBytes(256).toString("base64");
-// console.log(random);
 
-const saltRound = process.env.SALT_ROUND;
-
-// joi
-// express- validator
-// yup
 const createUser = async (req, res) => {
+  const saltRound = process.env.SALT_ROUND;
   const { username, email, password } = req.body;
   const hashed = await bcrypt.hash(password, 10);
 
