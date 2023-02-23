@@ -1,5 +1,3 @@
-const user = require("../user.json");
-const fs = require("fs/promises");
 const { UserDb } = require("../models/user");
 
 const getAllUser = async (req, res) => {
@@ -28,7 +26,7 @@ const getUserById = async (req, res) => {
 
     return res.status(404).json({
       data: currentUser,
-      message: `can find user with id ${id}`,
+      message: `cant find user with id ${id}`,
     });
   } catch (e) {
     console.log(e, "Error");
@@ -43,7 +41,7 @@ const updateUser = async (req, res) => {
     const id = req.params.id;
     const data = req.body;
     const findUser = await UserDb.findById(id);
-    console.log(findUser, "user ");
+
     if (!findUser?._id) {
       return res.status(404).json({
         status: false,
@@ -68,17 +66,19 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const id = req.params.id;
-    const currentUser = user.find((i) => i.id === +id);
+
+    const currentUser = await UserDb.findOne({ _id: id });
 
     if (!currentUser?.id) {
       return res.status(404).json({
         message: `user with ${id} not found`,
       });
     }
-    const updatedData = user.filter((i) => i.id !== +id);
+    await UserDb.deleteOne({ _id: id });
 
-    await fs.writeFile("user.json", JSON.stringify(updatedData, null, 2));
-    return res.status(204);
+    return res.status(200).json({
+      message: "success",
+    });
   } catch (e) {
     res.status(500).json({
       error: e,
