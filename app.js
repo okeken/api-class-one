@@ -11,7 +11,7 @@ const { connectDatabase } = require("./config/db");
 const { verifyToken } = require("./middlewares/auth");
 
 // SQL  - postgress
-// Non - SQL  - mongodb
+// Non - SQL  - mongodb - dynamo db
 const PORT = process.env.PORT || 5000;
 const app = express();
 
@@ -26,12 +26,14 @@ main()
     app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
     app.use("/", indexRouter);
     app.use("/auth", authRoute);
-    // app.use(verifyToken);
+    app.use(verifyToken);
     app.use("/task", taskRoute);
     app.use("/user", userRoute);
 
+    // RBAC -  Role Based Access Control
+
     app.listen(PORT, () => {
-      console.log(`App runnin on port ${PORT}`);
+      console.log(`App running on port ${PORT}`);
     });
   })
   .catch((e) => console.log(e));

@@ -4,15 +4,17 @@ const {
   getUserById,
   updateUser,
   deleteUser,
+  promoteUser,
 } = require("../controller/user");
-const { createUser } = require("../controller/auth");
+const { isSuperAdmin } = require("../middlewares/auth");
 
 const userRouter = express.Router();
 
 userRouter
+  .post("/promote", [isSuperAdmin], promoteUser)
   .get("/", getAllUser)
+  // .post("/", createUser)
   .get("/:id", getUserById)
-  .post("/", createUser)
   .put("/:id", updateUser)
   .delete("/:id", deleteUser);
 

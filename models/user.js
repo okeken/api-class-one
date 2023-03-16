@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
+// enum StudentType {
+//   staylite:0
+//   freser:1
+// }
 const userSchema = new Schema(
   {
     username: {
@@ -11,6 +15,11 @@ const userSchema = new Schema(
     email: {
       type: String,
       //   required: true,
+    },
+    role: {
+      type: String,
+      // enum: ["user", "admin", "superAdmin"],
+      default: "user",
     },
     hashedPassword: {
       type: String,

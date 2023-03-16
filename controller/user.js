@@ -1,4 +1,5 @@
 const { UserDb } = require("../models/user");
+const { ReasonPhrases, StatusCodes } = require("http-status-codes");
 
 const getAllUser = async (req, res) => {
   try {
@@ -48,7 +49,7 @@ const updateUser = async (req, res) => {
         message: "cant find user",
       });
     }
-    console.log(data);
+
     const updatedUser = await UserDb.updateOne({ $set: data });
 
     return res.status(201).json({
@@ -86,9 +87,67 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// const promoteUser = async (req, res) => {
+//   const currentUser = decodeToken(req);
+//   const { email, role } = req.body;
+//   const roleOfUser = currentUser.data.role;
+//   console.log(roleOfUser, role, email, "user Details+++++++++++++++++");
+//   // if (roleOfUser != "superAdmin") {
+//   //   res.status(StatusCodes.FORBIDDEN).json({
+//   //     status: false,
+//   //     message: ReasonPhrases.FORBIDDEN,
+//   //   });
+//   // }
+
+//   try {
+//     // const userUpdated = await UserDb.updateOne(
+//     //   { email },
+//     //   {
+//     //     $set: {
+//     //       role,
+//     //     },
+//     //   }
+//     // );
+
+//     return res.status(StatusCodes.CREATED).json({
+//       status: false,
+//       message: ReasonPhrases.OK,
+//     });
+//   } catch (e) {
+//     res.status(StatusCodes.BAD_GATEWAY).json({
+//       error: e,
+//       message: ReasonPhrases.BAD_GATEWAY,
+//     });
+//   }
+// };
+
+const promoteUser = async (req, res) => {
+  const { email, role } = req.body;
+  try {
+    await UserDb.updateOne(
+      { email },
+      {
+        $set: {
+          role,
+        },
+      }
+    );
+    return res.status(StatusCodes.OK).json({
+      message: "user promoted to " + role,
+    });
+  } catch (e) {
+    console.log(e, "Error ");
+    return res.status(500).json({
+      message: ReasonPhrases.BAD_GATEWAY,
+      error: e,
+    });
+  }
+};
+
 module.exports = {
   getAllUser,
   getUserById,
   updateUser,
   deleteUser,
+  promoteUser,
 };

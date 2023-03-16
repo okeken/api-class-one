@@ -54,7 +54,6 @@ Projects
 - Vacation Memoir App
 
   - Covers Data Relationship, file upload (cloudinary)
-  -
 
 - Invoicing System with Authentication/Authorization, Email and Payment Integration, pdf generation
 - Learning Platform with students, admin, teachers with certification of completion pdf

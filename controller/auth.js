@@ -1,8 +1,12 @@
 const { UserDb } = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { StatusCodes, ReasonPhrases } = require("http-status-codes");
 
 const createUser = async (req, res) => {
+  req.body;
+  req.params;
+
   const saltRound = process.env.SALT_ROUND;
   const { username, email, password } = req.body;
   const hashed = await bcrypt.hash(password, 10);
@@ -65,10 +69,9 @@ const login = async (req, res) => {
       });
     }
 
-    const deepClonedUser = JSON.parse(JSON.stringify(user));
     const accessToken = jwt.sign(
       {
-        data: deepClonedUser,
+        data: user._doc,
       },
       secret,
       { expiresIn: "24h" }
@@ -85,7 +88,16 @@ const login = async (req, res) => {
   }
 };
 
+const promoteUser = async (req, res) => {
+  try {
+    return res.status(StatusCodes.OK).json({
+      message: ReasonPhrases.ACCEPTED,
+    });
+  } catch (e) {}
+};
+
 module.exports = {
   createUser,
   login,
+  // promoteUser,
 };
