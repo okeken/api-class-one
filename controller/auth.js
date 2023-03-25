@@ -2,6 +2,7 @@ const { UserDb } = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { StatusCodes, ReasonPhrases } = require("http-status-codes");
+const { transport, createMailOptions } = require("../utils/nodemailer");
 
 const createUser = async (req, res) => {
   req.body;
@@ -38,7 +39,17 @@ const createUser = async (req, res) => {
       email,
       hashedPassword: hashed,
     });
+
     await created.save();
+    transport.sendMail(
+      { ...createMailOptions, to: email },
+      function (err, info) {
+        if (err) {
+          console.log("Erro Sendinf");
+        }
+        console.log(info, "messafe sent");
+      }
+    );
     return res.status(201).json({
       data: "user created",
     });
